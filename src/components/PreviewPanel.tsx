@@ -4,11 +4,13 @@ import { Download, Code, Maximize2 } from 'lucide-react';
 interface PreviewPanelProps {
   generatedCode?: string;
   onDownload: () => void;
+  onPreviewLoad: () => void;
 }
 
 export const PreviewPanel: React.FC<PreviewPanelProps> = ({ 
   generatedCode, 
-  onDownload 
+  onDownload,
+  onPreviewLoad
 }) => {
   const openFullscreen = () => {
     if (generatedCode) {
@@ -64,6 +66,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
           srcDoc={generatedCode}
           className="w-full h-full border border-gray-200 rounded-lg"
           title="Dashboard Preview"
+          onLoad={onPreviewLoad}
         />
       </div>
     </div>

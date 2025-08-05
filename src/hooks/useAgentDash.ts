@@ -29,6 +29,7 @@ Let's start by uploading your data files. What kind of dashboard are you looking
 
   const [isLoading, setIsLoading] = useState(false);
   const [dataAnalysis, setDataAnalysis] = useState<DataAnalysis | null>(null);
+  const [loadingMessageId, setLoadingMessageId] = useState<string | null>(null);
   const geminiService = new GeminiService('AIzaSyBRexGFUmrJwfSs5mMYE4k4QlSsriizfZ8');
 
   const addMessage = useCallback((content: string, type: Message['type'], isLoading = false) => {
@@ -61,6 +62,18 @@ Let's start by uploading your data files. What kind of dashboard are you looking
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [chatState.step, addMessage]);
+
+  const handlePreviewLoad = useCallback(() => {
+    if (loadingMessageId) {
+      updateMessage(loadingMessageId, {
+        content: `✅ Success! Your changes have been applied and the preview is updated.`,
+        isLoading: false,
+        type: 'success',
+      });
+      setLoadingMessageId(null);
+      setIsLoading(false);
+    }
+  }, [loadingMessageId, updateMessage]);
 
   const handleFileUpload = useCallback(async (files: UploadedFile[]) => {
     setChatState(prev => ({ ...prev, uploadedFiles: files }));
@@ -127,6 +140,7 @@ For example: "Create a modern, professional dashboard with revenue charts, custo
     
     const loadingId = addMessage('Perfect! Let me create your custom dashboard...', 'agent', true);
     setIsLoading(true);
+    setLoadingMessageId(loadingId);
 
     try {
       if (!dataAnalysis) throw new Error('No data analysis available');
@@ -138,34 +152,21 @@ For example: "Create a modern, professional dashboard with revenue charts, custo
       );
 
       setChatState(prev => ({ ...prev, generatedCode, step: 'preview' }));
-      
-      // Artificial delay to allow the iframe to start rendering
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      updateMessage(loadingId, {
-        content: `🎉 Your dashboard is ready! I've created a beautiful, interactive dashboard based on your requirements.
-
-**You can now click on any element in the preview to select it and ask me to make changes.**
-
-Feel free to download the files or ask me to make any adjustments!`,
-        isLoading: false,
-        type: 'success',
-      });
-
     } catch (error) {
       updateMessage(loadingId, {
         content: 'I encountered an error generating your dashboard. Please try describing your design requirements again.',
         isLoading: false,
       });
-      setChatState(prev => ({ ...prev, step: 'design' }));
-    } finally {
+      setLoadingMessageId(null);
       setIsLoading(false);
+      setChatState(prev => ({ ...prev, step: 'design' }));
     }
   }, [addMessage, updateMessage, geminiService, dataAnalysis, chatState.selectedData]);
 
   const handleElementModification = useCallback(async (modificationRequest: string, element: SelectedElement) => {
     const loadingId = addMessage(`Modifying the selected element: \`${element.selector}\`...`, 'agent', true);
     setIsLoading(true);
+    setLoadingMessageId(loadingId);
 
     try {
       if (!chatState.generatedCode) {
@@ -179,30 +180,21 @@ Feel free to download the files or ask me to make any adjustments!`,
       );
 
       setChatState(prev => ({ ...prev, generatedCode: modifiedCode, selectedElement: null }));
-      
-      // Artificial delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      updateMessage(loadingId, {
-        content: `✅ Element updated successfully! The changes for "${modificationRequest}" have been applied. You can select another element or ask for more general changes.`,
-        isLoading: false,
-        type: 'success',
-      });
-
     } catch (error) {
       updateMessage(loadingId, {
         content: 'I encountered an error modifying the element. Please try describing your changes differently.',
         isLoading: false,
       });
-      setChatState(prev => ({ ...prev, selectedElement: null }));
-    } finally {
+      setLoadingMessageId(null);
       setIsLoading(false);
+      setChatState(prev => ({ ...prev, selectedElement: null }));
     }
   }, [addMessage, updateMessage, geminiService, chatState.generatedCode]);
 
   const handleGenericModification = useCallback(async (modificationRequest: string) => {
     const loadingId = addMessage('Let me modify your dashboard...', 'agent', true);
     setIsLoading(true);
+    setLoadingMessageId(loadingId);
 
     try {
       if (!dataAnalysis || !chatState.generatedCode) {
@@ -224,22 +216,12 @@ Feel free to download the files or ask me to make any adjustments!`,
       );
 
       setChatState(prev => ({ ...prev, generatedCode: modifiedCode }));
-      
-      // Artificial delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      updateMessage(loadingId, {
-        content: `✅ Dashboard updated successfully! I've applied the requested changes. The updated dashboard is now visible in the preview panel.`,
-        isLoading: false,
-        type: 'success',
-      });
-
     } catch (error) {
       updateMessage(loadingId, {
         content: 'I encountered an error modifying your dashboard. Please try describing your changes differently.',
         isLoading: false,
       });
-    } finally {
+      setLoadingMessageId(null);
       setIsLoading(false);
     }
   }, [addMessage, updateMessage, geminiService, dataAnalysis, chatState.selectedData, chatState.generatedCode]);
@@ -297,5 +279,6 @@ Feel free to download the files or ask me to make any adjustments!`,
     handleDataSelection,
     handleUserMessage,
     downloadDashboard,
+    handlePreviewLoad,
   };
 };

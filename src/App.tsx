@@ -16,6 +16,7 @@ function App() {
     handleDataSelection,
     handleUserMessage,
     downloadDashboard,
+    handlePreviewLoad,
   } = useAgentDash();
 
   const getPlaceholderText = () => {
@@ -108,6 +109,7 @@ function App() {
             <PreviewPanel
               generatedCode={chatState.generatedCode}
               onDownload={downloadDashboard}
+              onPreviewLoad={handlePreviewLoad}
             />
           </div>
         </div>
