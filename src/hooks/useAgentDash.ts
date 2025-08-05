@@ -24,7 +24,7 @@ export const useAgentDash = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [dataAnalysis, setDataAnalysis] = useState<DataAnalysis | null>(null);
   const [loadingMessageId, setLoadingMessageId] = useState<string | null>(null);
-  const geminiService = new GeminiService('AIzaSyBRexGFUmrJwfSs5mMYE4k4QlSsriizfZ8');
+  const [geminiService, setGeminiService] = useState<GeminiService | null>(null);
 
   const addMessage = useCallback((content: string, type: Message['type'], isLoading = false) => {
     const newMessage: Message = {
@@ -37,6 +37,27 @@ export const useAgentDash = () => {
     setMessages(prev => [...prev, newMessage]);
     return newMessage.id;
   }, []);
+
+  useEffect(() => {
+    try {
+      setGeminiService(new GeminiService());
+    } catch (error) {
+      console.error(error);
+      setTimeout(() => {
+        addMessage(
+          `**Configuration Error:** The AI service couldn't start. This usually means the Gemini API key is missing or invalid.
+
+Please follow these steps:
+1.  Get your free API key from **Google AI Studio**.
+2.  Create a file named \`.env\` in the project's root folder.
+3.  Add this line to it: \`VITE_GEMINI_API_KEY="YOUR_API_KEY"\`
+4.  Replace \`YOUR_API_KEY\` with your actual key.
+5.  Click the **Rebuild** button above the chat.`,
+          'agent'
+        );
+      }, 100);
+    }
+  }, [addMessage]);
 
   const updateMessage = useCallback((id: string, props: Partial<Omit<Message, 'id'>>) => {
     setMessages(prev => prev.map(msg => 
@@ -71,6 +92,10 @@ export const useAgentDash = () => {
   const handleFileUpload = useCallback(async (files: UploadedFile[]) => {
     setChatState(prev => ({ ...prev, uploadedFiles: files }));
     if (files.length > 0) {
+      if (!geminiService) {
+        addMessage('AI service is not configured. Please check your API key and rebuild the app.', 'agent');
+        return;
+      }
       setIsLoading(true);
       const loadingId = addMessage('Analyzing your data files...', 'agent', true);
       try {
@@ -81,8 +106,9 @@ export const useAgentDash = () => {
           isLoading: false,
         });
         setChatState(prev => ({ ...prev, step: 'data-selection' }));
-      } catch (error) {
-        updateMessage(loadingId, { content: 'Sorry, I encountered an error analyzing your data.', isLoading: false });
+      } catch (error: any) {
+        console.error(error);
+        updateMessage(loadingId, { content: `Sorry, I encountered an error analyzing your data. The AI service might be unavailable or the API key is invalid. (Error: ${error.message})`, isLoading: false });
       } finally {
         setIsLoading(false);
       }
@@ -99,6 +125,10 @@ export const useAgentDash = () => {
   }, [addMessage]);
 
   const handleDesignDescription = useCallback(async (description: string) => {
+    if (!geminiService) {
+      addMessage('AI service is not configured. Please check your API key and rebuild the app.', 'agent');
+      return;
+    }
     setChatState(prev => ({ ...prev, designDescription: description, step: 'generation' }));
     const loadingId = addMessage('Perfect! Let me create your custom dashboard...', 'agent', true);
     setIsLoading(true);
@@ -109,8 +139,9 @@ export const useAgentDash = () => {
       const resultString = await geminiService.generateDashboard(dataAnalysis, chatState.selectedData === 'all', description, allData);
       const { title, description: desc, html } = JSON.parse(resultString);
       setChatState(prev => ({ ...prev, generatedCode: html, dashboardTitle: title, dashboardDescription: desc, step: 'preview' }));
-    } catch (error) {
-      updateMessage(loadingId, { content: 'I encountered an error generating your dashboard.', isLoading: false });
+    } catch (error: any) {
+      console.error(error);
+      updateMessage(loadingId, { content: `I encountered an error generating your dashboard. (Error: ${error.message})`, isLoading: false });
       setLoadingMessageId(null);
       setIsLoading(false);
       setChatState(prev => ({ ...prev, step: 'design' }));
@@ -118,6 +149,10 @@ export const useAgentDash = () => {
   }, [addMessage, updateMessage, geminiService, dataAnalysis, chatState.selectedData, chatState.uploadedFiles]);
 
   const handleElementModification = useCallback(async (modificationRequest: string, element: SelectedElement) => {
+    if (!geminiService) {
+      addMessage('AI service is not configured. Please check your API key and rebuild the app.', 'agent');
+      return;
+    }
     const loadingId = addMessage(`Modifying the selected element...`, 'agent', true);
     setIsLoading(true);
     setLoadingMessageId(loadingId);
@@ -125,8 +160,9 @@ export const useAgentDash = () => {
       if (!chatState.generatedCode) throw new Error('No dashboard code to modify');
       const modifiedCode = await geminiService.modifyDashboardElement(chatState.generatedCode, element, modificationRequest);
       setChatState(prev => ({ ...prev, generatedCode: modifiedCode, selectedElement: null }));
-    } catch (error) {
-      updateMessage(loadingId, { content: 'I encountered an error modifying the element.', isLoading: false });
+    } catch (error: any) {
+      console.error(error);
+      updateMessage(loadingId, { content: `I encountered an error modifying the element. (Error: ${error.message})`, isLoading: false });
       setLoadingMessageId(null);
       setIsLoading(false);
       setChatState(prev => ({ ...prev, selectedElement: null }));

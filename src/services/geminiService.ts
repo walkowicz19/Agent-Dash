@@ -6,10 +6,14 @@ export class GeminiService {
   private reasoningModel: GenerativeModel;
   private codingModel: GenerativeModel;
 
-  constructor(apiKey: string = 'AIzaSyBRexGFUmrJwfSs5mMYE4k4QlSsriizfZ8') {
+  constructor() {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey || !apiKey.startsWith('AIza')) {
+      throw new Error('VITE_GEMINI_API_KEY is not defined or is invalid. Please check your .env file.');
+    }
     this.genAI = new GoogleGenerativeAI(apiKey);
-    this.reasoningModel = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    this.codingModel = this.genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    this.reasoningModel = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    this.codingModel = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
   }
 
   private async callWithRetry<T>(apiCall: () => Promise<T>, maxRetries: number = 3, initialDelayMs: number = 1000): Promise<T> {
@@ -53,7 +57,8 @@ export class GeminiService {
       Return only valid JSON.
     `;
     const result = await this.callWithRetry(() => this.reasoningModel.generateContent(prompt));
-    return JSON.parse(result.response.text());
+    const text = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(text);
   }
 
   async generateDashboard(analysis: DataAnalysis, useAllData: boolean, designDescription: string, data: any[]): Promise<string> {
@@ -136,6 +141,7 @@ export class GeminiService {
       Output Format: Return ONLY the complete HTML code. Do not include markdown.
     `;
     const result = await this.callWithRetry(() => this.codingModel.generateContent(prompt));
-    return result.response.text();
+    const text = result.response.text().replace(/```html/g, '').replace(/```/g, '').trim();
+    return text;
   }
 }
