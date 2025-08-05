@@ -139,6 +139,9 @@ For example: "Create a modern, professional dashboard with revenue charts, custo
 
       setChatState(prev => ({ ...prev, generatedCode, step: 'preview' }));
       
+      // Artificial delay to allow the iframe to start rendering
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       updateMessage(loadingId, {
         content: `🎉 Your dashboard is ready! I've created a beautiful, interactive dashboard based on your requirements.
 
@@ -176,6 +179,9 @@ Feel free to download the files or ask me to make any adjustments!`,
       );
 
       setChatState(prev => ({ ...prev, generatedCode: modifiedCode, selectedElement: null }));
+      
+      // Artificial delay
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       updateMessage(loadingId, {
         content: `✅ Element updated successfully! The changes for "${modificationRequest}" have been applied. You can select another element or ask for more general changes.`,
@@ -218,6 +224,9 @@ Feel free to download the files or ask me to make any adjustments!`,
       );
 
       setChatState(prev => ({ ...prev, generatedCode: modifiedCode }));
+      
+      // Artificial delay
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       updateMessage(loadingId, {
         content: `✅ Dashboard updated successfully! I've applied the requested changes. The updated dashboard is now visible in the preview panel.`,

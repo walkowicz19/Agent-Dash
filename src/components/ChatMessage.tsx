@@ -53,7 +53,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           {message.isLoading ? (
             <div className="flex items-center space-x-2">
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Agent Dash is thinking...</span>
+              <span className="whitespace-pre-wrap">{message.content}</span>
             </div>
           ) : (
             <div 
