@@ -13,7 +13,7 @@ export class GeminiService {
     }
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.reasoningModel = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    this.codingModel = this.genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    this.codingModel = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
   }
 
   private async callWithRetry<T>(apiCall: () => Promise<T>, maxRetries: number = 3, initialDelayMs: number = 1000): Promise<T> {
