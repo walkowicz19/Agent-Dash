@@ -1,20 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// --- Hardcoded Supabase Configuration ---
+// NOTE: For development purposes, we are hardcoding the credentials here
+// to resolve the connection issue. In a production environment, it is
+// highly recommended to use environment variables (.env file) instead.
+const supabaseUrl = 'https://psekkivddkuxtlzzfxih.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzZWtraXZkZGt1eHRsenpmeGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MDE3NzIsImV4cCI6MjA2OTk3Nzc3Mn0.Oobsdm9fyIxALbB_BLruxqWwYxDVCKM2rM1F04tJ470';
 
-// Log the values to help with debugging
-console.log('Attempting to connect to Supabase with URL:', supabaseUrl);
-
-if (!supabaseUrl || !supabaseAnonKey || typeof supabaseUrl !== 'string' || supabaseUrl.includes('PASTE_YOUR')) {
-  const errorMessage = `
-    Supabase configuration error:
-    - VITE_SUPABASE_URL is missing, invalid, or still a placeholder.
-    - Please check your .env file and ensure it contains the correct Supabase Project URL and Anon Key.
-    - Current URL value being used: "${supabaseUrl}"
-  `;
-  console.error(errorMessage);
-  throw new Error('Supabase URL and/or Anon Key are invalid. Check the developer console for details.');
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Supabase URL and/or Anon Key are missing in the code.');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
