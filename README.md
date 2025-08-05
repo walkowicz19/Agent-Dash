@@ -4,6 +4,8 @@ Agent Dash is a sophisticated desktop application that transforms raw data into 
 # Project Evolution: A Step-by-Step Journey
 The creation of Agent Dash was a deliberate process, moving from a conceptual workflow to a polished application:
 
+<img width="1920" height="1200" alt="Captura de Tela (46)" src="https://github.com/user-attachments/assets/9338a4f3-d873-46c0-b221-c5bcff734ae4" />
+
 - Initial Concept (LangFlow Agent): As shown in the LangFlow screenshot, the project's foundation was an AI agent built in LangFlow. This visual workflow demonstrated the core logic of using AI to process data and generate an output. It was the crucial first step to prove the concept's viability.
 
 - Front-End Prototype (Bolt.new): To give the project a user-facing interface, a front-end prototype was developed using Bolt.new. This initial app provided the basic application structure, allowing for the "Welcome to Agent Dash" screen and navigation between different views.
