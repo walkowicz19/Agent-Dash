@@ -29,6 +29,8 @@ export interface ChatState {
   selectedData?: 'all' | 'insights';
   designDescription?: string;
   generatedCode?: string;
+  dashboardTitle?: string;
+  dashboardDescription?: string;
   selectedElement?: SelectedElement | null;
 }
 

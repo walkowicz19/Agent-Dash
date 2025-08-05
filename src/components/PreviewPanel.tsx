@@ -1,20 +1,23 @@
 import React from 'react';
-import { Download, Code, Maximize2 } from 'lucide-react';
+import { Download, Code, Maximize2, Save, Check } from 'lucide-react';
 
 interface PreviewPanelProps {
   generatedCode?: string;
   onDownload: () => void;
   onPreviewLoad: () => void;
+  onSave: () => void;
+  isSaved?: boolean;
 }
 
 export const PreviewPanel: React.FC<PreviewPanelProps> = ({ 
   generatedCode, 
   onDownload,
-  onPreviewLoad
+  onPreviewLoad,
+  onSave,
+  isSaved = false
 }) => {
   const openFullscreen = () => {
     if (generatedCode) {
-      // Remove the selection script for the fullscreen view to disable editing
       const codeForFullscreen = generatedCode.replace(
         /<script id="agent-dash-selection-script">[\s\S]*?<\/script>/,
         ''
@@ -45,8 +48,16 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
         <h3 className="font-semibold text-gray-900">Dashboard Preview</h3>
         <div className="flex space-x-2">
           <button
+            onClick={onSave}
+            disabled={isSaved}
+            className="flex items-center space-x-2 px-3 py-1.5 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {isSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            <span>{isSaved ? 'Saved' : 'Save'}</span>
+          </button>
+          <button
             onClick={onDownload}
-            className="flex items-center space-x-2 px-3 py-1.5 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-sm"
+            className="flex items-center space-x-2 px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-sm"
           >
             <Download className="w-4 h-4" />
             <span>Download</span>
