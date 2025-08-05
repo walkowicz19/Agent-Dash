@@ -45,14 +45,16 @@ export const useAgentDash = () => {
       console.error(error);
       setTimeout(() => {
         addMessage(
-          `**Configuration Error:** The AI service couldn't start. This usually means the Gemini API key is missing or invalid.
+          `**API Key Error:** I'm still unable to connect to the AI service. Let's double-check the setup.
 
-Please follow these steps:
-1.  Get your free API key from **Google AI Studio**.
-2.  Create a file named \`.env\` in the project's root folder.
-3.  Add this line to it: \`VITE_GEMINI_API_KEY="YOUR_API_KEY"\`
-4.  Replace \`YOUR_API_KEY\` with your actual key.
-5.  Click the **Rebuild** button above the chat.`,
+**Troubleshooting Checklist:**
+*   **File Name:** Is the file in the root directory named exactly \`.env\`? (with the dot)
+*   **Variable Name:** Inside \`.env\`, is the variable name exactly \`VITE_GEMINI_API_KEY\`?
+*   **File Content:** Does the file contain this exact line?
+    \`VITE_GEMINI_API_KEY="YOUR_API_KEY_HERE"\`
+*   **Rebuild:** Did you click the **Rebuild** button after saving the \`.env\` file?
+
+A full rebuild is required for the app to see the new API key. If you've checked all these steps, please try clicking **Rebuild** one more time.`,
           'agent'
         );
       }, 100);
