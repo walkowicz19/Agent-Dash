@@ -18,6 +18,24 @@ function App() {
     downloadDashboard,
   } = useAgentDash();
 
+  const getPlaceholderText = () => {
+    if (chatState.selectedElement) {
+      return `Describe change for <${chatState.selectedElement.tagName.toLowerCase()}>...`;
+    }
+    switch (chatState.step) {
+      case 'upload':
+        return "Upload your files first...";
+      case 'data-selection':
+        return "Please select your data approach above...";
+      case 'design':
+        return "Describe your dashboard design...";
+      case 'preview':
+        return "Describe a change or select an element to modify...";
+      default:
+        return "Ask me anything about your dashboard...";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -80,15 +98,7 @@ function App() {
               <ChatInput
                 onSendMessage={handleUserMessage}
                 disabled={isLoading || chatState.step === 'upload' || chatState.step === 'data-selection'}
-                placeholder={
-                  chatState.step === 'upload' 
-                    ? "Upload your files first..."
-                    : chatState.step === 'data-selection'
-                    ? "Please select your data approach above..."
-                    : chatState.step === 'design'
-                    ? "Describe your dashboard design..."
-                    : "Ask me anything about your dashboard..."
-                }
+                placeholder={getPlaceholderText()}
               />
             </div>
           </div>

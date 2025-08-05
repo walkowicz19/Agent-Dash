@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { Message, ChatState, UploadedFile, DataAnalysis } from '../types';
+import { useState, useCallback, useEffect } from 'react';
+import { Message, ChatState, UploadedFile, DataAnalysis, SelectedElement } from '../types';
 import { GeminiService } from '../services/geminiService';
 
 export const useAgentDash = () => {
@@ -24,6 +24,7 @@ Let's start by uploading your data files. What kind of dashboard are you looking
   const [chatState, setChatState] = useState<ChatState>({
     step: 'upload',
     uploadedFiles: [],
+    selectedElement: null,
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -47,6 +48,19 @@ Let's start by uploading your data files. What kind of dashboard are you looking
       msg.id === id ? { ...msg, content, isLoading } : msg
     ));
   }, []);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const { type, payload } = event.data;
+      if (type === 'element-selected' && chatState.step === 'preview') {
+        setChatState(prev => ({ ...prev, selectedElement: payload }));
+        addMessage(`Element selected: \`${payload.selector}\`. How would you like to change it?`, 'agent');
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [chatState.step, addMessage]);
 
   const handleFileUpload = useCallback(async (files: UploadedFile[]) => {
     setChatState(prev => ({ ...prev, uploadedFiles: files }));
@@ -121,15 +135,9 @@ For example: "Create a modern, professional dashboard with revenue charts, custo
       
       updateMessage(loadingId, `🎉 Your dashboard is ready! I've created a beautiful, interactive dashboard based on your requirements.
 
-**Features included:**
-• Real-time data visualization
-• Interactive charts and graphs  
-• Filterable data tables
-• Key performance indicators
-• Responsive design
-• Professional styling
+**You can now click on any element in the preview to select it and ask me to make changes.**
 
-You can see the live preview on the right. Feel free to download the files or ask me to make any adjustments!`);
+Feel free to download the files or ask me to make any adjustments!`);
 
     } catch (error) {
       updateMessage(loadingId, 'I encountered an error generating your dashboard. Please try describing your design requirements again.');
@@ -139,7 +147,34 @@ You can see the live preview on the right. Feel free to download the files or as
     }
   }, [addMessage, updateMessage, geminiService, dataAnalysis, chatState.selectedData]);
 
-  const handleDashboardModification = useCallback(async (modificationRequest: string) => {
+  const handleElementModification = useCallback(async (modificationRequest: string, element: SelectedElement) => {
+    const loadingId = addMessage(`Modifying the selected element: \`${element.selector}\`...`, 'agent', true);
+    setIsLoading(true);
+
+    try {
+      if (!chatState.generatedCode) {
+        throw new Error('No dashboard code to modify');
+      }
+
+      const modifiedCode = await geminiService.modifyDashboardElement(
+        chatState.generatedCode,
+        element,
+        modificationRequest
+      );
+
+      setChatState(prev => ({ ...prev, generatedCode: modifiedCode, selectedElement: null }));
+      
+      updateMessage(loadingId, `✅ Element updated successfully! The changes for "${modificationRequest}" have been applied. You can select another element or ask for more general changes.`);
+
+    } catch (error) {
+      updateMessage(loadingId, 'I encountered an error modifying the element. Please try describing your changes differently.');
+      setChatState(prev => ({ ...prev, selectedElement: null }));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [addMessage, updateMessage, geminiService, chatState.generatedCode]);
+
+  const handleGenericModification = useCallback(async (modificationRequest: string) => {
     const loadingId = addMessage('Let me modify your dashboard...', 'agent', true);
     setIsLoading(true);
 
@@ -148,26 +183,12 @@ You can see the live preview on the right. Feel free to download the files or as
         throw new Error('No dashboard to modify');
       }
 
-      // Create a modification prompt for the AI
       const modificationPrompt = `
         The user wants to modify their existing dashboard. Here's their request:
         "${modificationRequest}"
-
-        Current dashboard analysis: ${JSON.stringify(dataAnalysis, null, 2)}
         
         Please modify the existing dashboard code to incorporate the user's requested changes.
-        The current dashboard includes:
-        - Interactive charts using ApexCharts
-        - Data tables with filtering
-        - KPI cards
-        - Professional styling
-        
-        User's modification request: ${modificationRequest}
-        
-        Please generate the complete modified HTML dashboard code that incorporates these changes.
-        Maintain all existing functionality while adding the requested modifications.
-        
-        Return only the complete HTML code without any markdown formatting or explanations.
+        Return only the complete modified HTML code.
       `;
 
       const modifiedCode = await geminiService.generateDashboard(
@@ -178,14 +199,10 @@ You can see the live preview on the right. Feel free to download the files or as
 
       setChatState(prev => ({ ...prev, generatedCode: modifiedCode }));
       
-      updateMessage(loadingId, `✅ Dashboard updated successfully! I've made the following changes based on your request:
-
-${modificationRequest}
-
-The updated dashboard is now visible in the preview panel. You can continue to ask for more modifications or download the updated version!`);
+      updateMessage(loadingId, `✅ Dashboard updated successfully! I've applied the requested changes. The updated dashboard is now visible in the preview panel.`);
 
     } catch (error) {
-      updateMessage(loadingId, 'I encountered an error modifying your dashboard. Please try describing your changes differently or be more specific about what you\'d like to modify.');
+      updateMessage(loadingId, 'I encountered an error modifying your dashboard. Please try describing your changes differently.');
     } finally {
       setIsLoading(false);
     }
@@ -194,9 +211,13 @@ The updated dashboard is now visible in the preview panel. You can continue to a
   const handleUserMessage = useCallback((content: string) => {
     addMessage(content, 'user');
 
-    // Check if user wants to modify existing dashboard
+    if (chatState.selectedElement) {
+      handleElementModification(content, chatState.selectedElement);
+      return;
+    }
+
     if (chatState.step === 'preview' && chatState.generatedCode) {
-      handleDashboardModification(content);
+      handleGenericModification(content);
       return;
     }
 
@@ -208,12 +229,12 @@ The updated dashboard is now visible in the preview panel. You can continue to a
         handleDesignDescription(content);
         break;
       case 'preview':
-        addMessage('I can help you modify your dashboard! Try asking me to:\n\n• Change colors or styling\n• Add new chart types\n• Modify the layout\n• Add or remove features\n• Update data filters\n\nWhat would you like to change?', 'agent');
+        addMessage('I can help you modify your dashboard! Try asking me to:\n\n• Change colors or styling\n• Add new chart types\n• Modify the layout\n• Add or remove features\n\nWhat would you like to change?', 'agent');
         break;
       default:
         addMessage('I\'m here to help! What would you like to know about your dashboard?', 'agent');
     }
-  }, [addMessage, chatState, handleDashboardModification, handleDesignDescription]);
+  }, [addMessage, chatState, handleElementModification, handleGenericModification, handleDesignDescription]);
 
   const downloadDashboard = useCallback(() => {
     if (chatState.generatedCode) {

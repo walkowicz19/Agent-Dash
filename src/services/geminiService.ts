@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
-import { DataAnalysis, UploadedFile } from '../types';
+import { DataAnalysis, UploadedFile, SelectedElement } from '../types';
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
@@ -126,6 +126,7 @@ export class GeminiService {
         - **KPIs:** Include KPIs that are relevant to THIS data, not generic ones.
         - **Interactivity:** The dashboard must be fully responsive, with interactive filters and a search bar.
         - **Styling:** Use a professional, clean design with a white background, black primary color, and gray secondary color. Implement a responsive grid layout and smooth hover effects.
+        - **Element Selection Script:** You MUST include the element selection script provided below at the end of the <body> tag.
 
         **4. Specific Features to Include:**
         - A header containing the AI-generated title.
@@ -133,7 +134,47 @@ export class GeminiService {
         - ${useAllData ? '3-4 different chart types.' : '2-3 focused charts.'}
         - A data table displaying the first 8 columns: [${analysis.columns.slice(0, 8).join(', ')}].
 
-        **5. Output Format:**
+        **5. Element Selection Script (MANDATORY):**
+        <script>
+          document.addEventListener('DOMContentLoaded', () => {
+            let currentlySelected = null;
+            document.body.addEventListener('click', (e) => {
+              if (e.target === document.body) return;
+              e.preventDefault();
+              e.stopPropagation();
+              
+              if (currentlySelected) {
+                currentlySelected.style.outline = '';
+              }
+              e.target.style.outline = '2px solid #3b82f6';
+              currentlySelected = e.target;
+
+              const getSelector = (el) => {
+                if (!el) return '';
+                if (el.id) return \`#\${el.id}\`;
+                let selector = el.tagName.toLowerCase();
+                if (el.className) {
+                  const stableClasses = Array.from(el.classList).filter(c => !c.includes(':') && !c.includes('hover'));
+                  if(stableClasses.length > 0) {
+                    selector += '.' + stableClasses.join('.');
+                  }
+                }
+                return selector;
+              };
+
+              const payload = {
+                selector: getSelector(e.target),
+                tagName: e.target.tagName,
+                id: e.target.id,
+                className: e.target.className,
+                innerText: e.target.innerText.substring(0, 200)
+              };
+              window.parent.postMessage({ type: 'element-selected', payload }, '*');
+            });
+          });
+        </script>
+
+        **6. Output Format:**
         - Your entire response must be ONLY the complete HTML code.
         - Start your response with \`<!DOCTYPE html>\` and end with \`</html>\`.
         - DO NOT include any markdown formatting (like \`\`\`html), comments, or explanations outside of the HTML code itself.
@@ -146,6 +187,44 @@ export class GeminiService {
       console.error('Error generating dashboard:', error);
       return this.createFallbackDashboard(analysis, designDescription);
     }
+  }
+
+  async modifyDashboardElement(
+    currentCode: string,
+    element: SelectedElement,
+    modificationRequest: string
+  ): Promise<string> {
+    const prompt = `
+      You are an expert web developer. The user wants to modify a specific element in their existing HTML dashboard.
+
+      **Current Dashboard Code:**
+      \`\`\`html
+      ${currentCode}
+      \`\`\`
+
+      **Selected Element to Modify:**
+      - **CSS Selector:** \`${element.selector}\`
+      - **Tag Name:** ${element.tagName}
+      - **Inner Text Preview:** "${element.innerText}"
+
+      **User's Modification Request:**
+      "${modificationRequest}"
+
+      **Instructions:**
+      1. Locate the element identified by the selector \`${element.selector}\`.
+      2. Modify the element and its related code (HTML, inline CSS/JS) to fulfill the user's request.
+      3. Ensure the rest of the dashboard remains unchanged and fully functional.
+      4. Return the **complete, updated HTML code** for the entire dashboard.
+
+      **Output Format:**
+      - Your entire response must be ONLY the complete HTML code.
+      - Start your response with \`<!DOCTYPE html>\` and end with \`</html>\`.
+      - DO NOT include any markdown formatting (like \`\`\`html) or explanations.
+    `;
+    
+    const result = await this.callWithRetry(() => this.codingModel.generateContent(prompt));
+    const response = await result.response;
+    return response.text();
   }
 
   private createFallbackAnalysis(files: UploadedFile[]): DataAnalysis {
