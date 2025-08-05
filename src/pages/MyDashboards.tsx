@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../services/supabaseClient';
-import { LayoutDashboard, Clock, FileText, Loader2, Home } from 'lucide-react';
+import { LayoutDashboard, Clock, FileText, Loader2, Home, Trash2 } from 'lucide-react';
 
 interface DashboardRecord {
   id: string;
@@ -34,6 +34,28 @@ const MyDashboards: React.FC = () => {
 
     fetchDashboards();
   }, []);
+
+  const handleDelete = async (dashboardId: string) => {
+    const isConfirmed = window.confirm(
+      'Are you sure you want to delete this dashboard? This action cannot be undone.'
+    );
+
+    if (isConfirmed) {
+      const { error } = await supabase
+        .from('dashboards')
+        .delete()
+        .eq('id', dashboardId);
+
+      if (error) {
+        console.error('Error deleting dashboard:', error);
+        setError('Could not delete the dashboard. Please try again.');
+      } else {
+        setDashboards(prevDashboards =>
+          prevDashboards.filter(d => d.id !== dashboardId)
+        );
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -70,21 +92,35 @@ const MyDashboards: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {dashboards.map(d => (
-              <Link
+              <div
                 key={d.id}
-                to={`/dashboard/${d.id}`}
-                className="group block p-6 bg-white rounded-lg border border-gray-200 hover:border-black hover:shadow-lg transition-all duration-300"
+                className="group relative p-6 bg-white rounded-lg border border-gray-200 hover:border-black hover:shadow-lg transition-all duration-300"
               >
-                <h3 className="font-semibold text-gray-900 group-hover:text-black transition-colors">{d.title}</h3>
-                <p className="text-sm text-gray-600 mt-2 line-clamp-2 flex items-start">
-                  <FileText className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>{d.description}</span>
-                </p>
-                <p className="text-xs text-gray-400 mt-4 flex items-center">
-                  <Clock className="w-3 h-3 mr-1.5" />
-                  Created on {new Date(d.created_at).toLocaleString()}
-                </p>
-              </Link>
+                <Link to={`/dashboard/${d.id}`} className="block space-y-2">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 group-hover:text-black transition-colors pr-8">{d.title}</h3>
+                    <p className="text-sm text-gray-600 mt-2 line-clamp-2 flex items-start">
+                      <FileText className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
+                      <span>{d.description}</span>
+                    </p>
+                  </div>
+                  <p className="text-xs text-gray-400 pt-2 flex items-center">
+                    <Clock className="w-3 h-3 mr-1.5" />
+                    Created on {new Date(d.created_at).toLocaleString()}
+                  </p>
+                </Link>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDelete(d.id);
+                  }}
+                  className="absolute top-4 right-4 p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-red-100 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all"
+                  aria-label="Delete dashboard"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             ))}
           </div>
         )}
