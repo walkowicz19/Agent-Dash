@@ -12,9 +12,15 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
 }) => {
   const openFullscreen = () => {
     if (generatedCode) {
+      // Remove the selection script for the fullscreen view to disable editing
+      const codeForFullscreen = generatedCode.replace(
+        /<script id="agent-dash-selection-script">[\s\S]*?<\/script>/,
+        ''
+      );
+
       const newWindow = window.open('', '_blank');
       if (newWindow) {
-        newWindow.document.write(generatedCode);
+        newWindow.document.write(codeForFullscreen);
         newWindow.document.close();
       }
     }

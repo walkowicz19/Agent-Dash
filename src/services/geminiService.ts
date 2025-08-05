@@ -135,7 +135,7 @@ export class GeminiService {
         - A data table displaying the first 8 columns: [${analysis.columns.slice(0, 8).join(', ')}].
 
         **5. Element Selection Script (MANDATORY):**
-        <script>
+        <script id="agent-dash-selection-script">
           document.addEventListener('DOMContentLoaded', () => {
             let currentlySelected = null;
             document.body.addEventListener('click', (e) => {
