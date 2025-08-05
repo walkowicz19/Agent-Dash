@@ -10,7 +10,13 @@ The creation of Agent Dash was a deliberate process, moving from a conceptual wo
 
 - Front-End Prototype (Bolt.new): To give the project a user-facing interface, a front-end prototype was developed using Bolt.new. This initial app provided the basic application structure, allowing for the "Welcome to Agent Dash" screen and navigation between different views.
 
+<img width="1920" height="1006" alt="Captura de Tela (43)" src="https://github.com/user-attachments/assets/ef3ac4fe-3654-4ae0-8307-48db7bb51223" />
+
+
 - Logic and UI Enhancement (Dyad): The final stage involved a significant upgrade using Dyad. This app was used to enhance the front-end logic and create the full-featured user interface. Dyad enabled the creation of dynamic, interactive components, such as the dashboard creation wizard and the "My Saved Dashboards" view.
+
+<img width="1920" height="991" alt="Captura de Tela (44)" src="https://github.com/user-attachments/assets/24933b59-26cc-4d72-868c-3b3324ff07b9" />
+<img width="1920" height="1000" alt="Captura de Tela (45)" src="https://github.com/user-attachments/assets/d4106488-b001-449d-bd21-8adab1396fe2" />
 
 # Core Technology
 Our platform is built on a modern and powerful stack:
