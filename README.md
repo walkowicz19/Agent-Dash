@@ -42,6 +42,9 @@ Agent Dash streamlines dashboard creation into an intuitive, AI-powered workflow
 
 - Save and Manage: Once generated, the dashboard is saved to your account in Supabase, accessible from the "My Saved Dashboards" screen.
 
+<img width="1920" height="999" alt="Captura de Tela (50)" src="https://github.com/user-attachments/assets/ef9bdb0b-fc1e-4921-a504-2ebc6aea7847" />
+<img width="1920" height="1011" alt="Captura de Tela (49)" src="https://github.com/user-attachments/assets/47836dc6-6cd8-44a8-b9c6-4d8f29b8f794" />
+
 # Key Features
 - AI-Powered Creation: Effortlessly create dashboards from data and simple text prompts.
 
