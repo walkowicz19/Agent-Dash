@@ -36,6 +36,15 @@ export class GeminiService {
     throw lastError;
   }
 
+  private extractJsonObject(text: string): string {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) {
+      console.error("Raw AI response:", text);
+      throw new Error("No valid JSON object found in the AI response.");
+    }
+    return match[0];
+  }
+
   async analyzeData(files: UploadedFile[]): Promise<DataAnalysis> {
     const fileContents = files.map(file => ({
       name: file.name,
@@ -57,8 +66,8 @@ export class GeminiService {
       Return only valid JSON.
     `;
     const result = await this.callWithRetry(() => this.reasoningModel.generateContent(prompt));
-    const text = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-    return JSON.parse(text);
+    const jsonString = this.extractJsonObject(result.response.text());
+    return JSON.parse(jsonString);
   }
 
   async generateDashboard(analysis: DataAnalysis, useAllData: boolean, designDescription: string, data: any[]): Promise<string> {
@@ -128,7 +137,7 @@ export class GeminiService {
       }
     `;
     const result = await this.callWithRetry(() => this.codingModel.generateContent(prompt));
-    return result.response.text();
+    return this.extractJsonObject(result.response.text());
   }
 
   async modifyDashboardElement(currentCode: string, element: SelectedElement, modificationRequest: string): Promise<string> {
