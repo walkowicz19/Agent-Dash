@@ -41,5 +41,5 @@ Agent Dash streamlines dashboard creation into an intuitive, AI-powered workflow
 
 - Intuitive UI: A clean and modern user interface powered by Dyad.
 
-Secure Storage: Your data and dashboards are securely managed with Supabase.
+- Secure Storage: Your data and dashboards are securely managed with Supabase.
 
