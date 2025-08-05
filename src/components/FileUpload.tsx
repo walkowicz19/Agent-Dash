@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { Upload, File, X } from 'lucide-react';
 import { UploadedFile } from '../types';
+import * as d3 from 'd3';
 
 interface FileUploadProps {
   files: UploadedFile[];
@@ -21,18 +22,38 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       return;
     }
 
+    const newFiles: UploadedFile[] = [...files];
+
     selectedFiles.forEach(file => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const newFile: UploadedFile = {
+        const content = e.target?.result as string;
+        let parsedData: any[] = [];
+
+        try {
+          if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+            parsedData = d3.csvParse(content);
+          } else if (file.type === 'application/json' || file.name.endsWith('.json')) {
+            parsedData = JSON.parse(content);
+          }
+        } catch (err) {
+          console.error(`Error parsing file ${file.name}:`, err);
+          alert(`Could not parse the file: ${file.name}. Please ensure it is a valid format.`);
+        }
+
+        newFiles.push({
           id: Math.random().toString(36).substr(2, 9),
           name: file.name,
           type: file.type,
           size: file.size,
-          content: e.target?.result || '',
-        };
-        
-        onFilesChange([...files, newFile]);
+          content: content,
+          data: parsedData,
+        });
+
+        // Update state after each file is processed
+        if (newFiles.length === files.length + selectedFiles.length) {
+          onFilesChange(newFiles);
+        }
       };
       reader.readAsText(file);
     });

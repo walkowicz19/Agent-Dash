@@ -102,9 +102,13 @@ export class GeminiService {
   async generateDashboard(
     analysis: DataAnalysis, 
     useAllData: boolean, 
-    designDescription: string
+    designDescription: string,
+    data: any[]
   ): Promise<string> {
     try {
+      const dataSampleJSON = JSON.stringify(data.slice(0, 20), null, 2);
+      const fullDataString = JSON.stringify(data);
+
       const prompt = `
         You are an expert web developer. Create a complete, functional, and unique HTML dashboard based on the following specific requirements.
 
@@ -115,26 +119,35 @@ export class GeminiService {
         - **Key Insights:** ${analysis.keyInsights.join(' | ')}
         - **Data Scope:** ${useAllData ? 'Use ALL available data columns for comprehensive visualizations.' : 'Focus ONLY on key insights for streamlined visualizations.'}
 
-        **2. User Design Preferences:**
+        **2. User's Data (MANDATORY TO USE):**
+        - You MUST use the user's data to populate the dashboard. Do NOT generate your own sample data.
+        - The data is provided below. You must embed this data directly into a \`<script>\` tag in the generated HTML inside a variable named \`data\`.
+        - **Full Data (embed this in the script):** \`const data = ${fullDataString};\`
+        - **Data Sample (for your reference on structure):** 
+        \`\`\`json
+        ${dataSampleJSON}
+        \`\`\`
+
+        **3. User Design Preferences:**
         - **Style & Features:** "${designDescription}"
 
-        **3. Mandatory Requirements:**
+        **4. Mandatory Requirements:**
         - **Dashboard Title:** Generate a creative and descriptive title for the dashboard based on the data's content (e.g., "Global Sales Performance", "Customer Subscription Trends"). The title must NOT contain any session or dashboard IDs.
-        - **Content:** The dashboard must be unique and directly reflect the provided data analysis. Use the EXACT column names: [${analysis.columns.join(', ')}].
-        - **Data:** Generate realistic sample data that matches the column structure and analysis summary.
+        - **Content:** The dashboard must be unique and directly reflect the provided data analysis and the user's data. Use the EXACT column names from the analysis: [${analysis.columns.join(', ')}].
+        - **Data Source:** The dashboard's charts and tables MUST be powered by the \`data\` variable you embed in the script. All calculations for KPIs, charts, etc., must be done on this data variable.
         - **Visualizations:** Use ApexCharts for all charts. The charts must be relevant to THIS specific dataset.
-        - **KPIs:** Include KPIs that are relevant to THIS data, not generic ones.
-        - **Interactivity:** The dashboard must be fully responsive, with interactive filters and a search bar.
+        - **KPIs:** Include KPIs that are calculated from the provided \`data\` variable, not generic ones.
+        - **Interactivity:** The dashboard must be fully responsive, with interactive filters and a search bar that filter the actual data.
         - **Styling:** Use a professional, clean design with a white background, black primary color, and gray secondary color. Implement a responsive grid layout and smooth hover effects.
         - **Element Selection Script:** You MUST include the element selection script provided below at the end of the <body> tag.
 
-        **4. Specific Features to Include:**
+        **5. Specific Features to Include:**
         - A header containing the AI-generated title.
         - ${useAllData ? '4-6 KPI cards based on ALL data columns.' : '3-4 KPI cards based on key insights.'}
         - ${useAllData ? '3-4 different chart types.' : '2-3 focused charts.'}
         - A data table displaying the first 8 columns: [${analysis.columns.slice(0, 8).join(', ')}].
 
-        **5. Element Selection Script (MANDATORY):**
+        **6. Element Selection Script (MANDATORY):**
         <script id="agent-dash-selection-script">
           document.addEventListener('DOMContentLoaded', () => {
             let currentlySelected = null;
@@ -174,7 +187,7 @@ export class GeminiService {
           });
         </script>
 
-        **6. Output Format:**
+        **7. Output Format:**
         - Your entire response must be ONLY the complete HTML code.
         - Start your response with \`<!DOCTYPE html>\` and end with \`</html>\`.
         - DO NOT include any markdown formatting (like \`\`\`html), comments, or explanations outside of the HTML code itself.

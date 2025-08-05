@@ -145,10 +145,13 @@ For example: "Create a modern, professional dashboard with revenue charts, custo
     try {
       if (!dataAnalysis) throw new Error('No data analysis available');
       
+      const allData = chatState.uploadedFiles.flatMap(file => file.data || []);
+
       const generatedCode = await geminiService.generateDashboard(
         dataAnalysis,
         chatState.selectedData === 'all',
-        description
+        description,
+        allData
       );
 
       setChatState(prev => ({ ...prev, generatedCode, step: 'preview' }));
@@ -161,7 +164,7 @@ For example: "Create a modern, professional dashboard with revenue charts, custo
       setIsLoading(false);
       setChatState(prev => ({ ...prev, step: 'design' }));
     }
-  }, [addMessage, updateMessage, geminiService, dataAnalysis, chatState.selectedData]);
+  }, [addMessage, updateMessage, geminiService, dataAnalysis, chatState.selectedData, chatState.uploadedFiles]);
 
   const handleElementModification = useCallback(async (modificationRequest: string, element: SelectedElement) => {
     const loadingId = addMessage(`Modifying the selected element: \`${element.selector}\`...`, 'agent', true);
@@ -208,11 +211,14 @@ For example: "Create a modern, professional dashboard with revenue charts, custo
         Please modify the existing dashboard code to incorporate the user's requested changes.
         Return only the complete modified HTML code.
       `;
+      
+      const allData = chatState.uploadedFiles.flatMap(file => file.data || []);
 
       const modifiedCode = await geminiService.generateDashboard(
         dataAnalysis,
         chatState.selectedData === 'all',
-        modificationPrompt
+        modificationPrompt,
+        allData
       );
 
       setChatState(prev => ({ ...prev, generatedCode: modifiedCode }));
@@ -224,7 +230,7 @@ For example: "Create a modern, professional dashboard with revenue charts, custo
       setLoadingMessageId(null);
       setIsLoading(false);
     }
-  }, [addMessage, updateMessage, geminiService, dataAnalysis, chatState.selectedData, chatState.generatedCode]);
+  }, [addMessage, updateMessage, geminiService, dataAnalysis, chatState.selectedData, chatState.generatedCode, chatState.uploadedFiles]);
 
   const handleUserMessage = useCallback((content: string) => {
     addMessage(content, 'user');
