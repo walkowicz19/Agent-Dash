@@ -18,7 +18,7 @@ export interface UploadedFile {
 export interface ChatState {
   step: 'upload' | 'data-selection' | 'design' | 'generation' | 'preview';
   uploadedFiles: UploadedFile[];
-  selectedData?: any[];
+  selectedData?: 'all' | 'insights';
   designDescription?: string;
   generatedCode?: string;
 }

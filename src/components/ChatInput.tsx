@@ -25,7 +25,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <form onSubmit={handleSubmit} className="flex space-x-2">
       <textarea
-        type="text"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         placeholder={placeholder}

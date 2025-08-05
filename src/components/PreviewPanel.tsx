@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, ExternalLink, Code, Maximize2 } from 'lucide-react';
+import { Download, Code, Maximize2 } from 'lucide-react';
 
 interface PreviewPanelProps {
   generatedCode?: string;

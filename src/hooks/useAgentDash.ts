@@ -213,8 +213,7 @@ The updated dashboard is now visible in the preview panel. You can continue to a
       default:
         addMessage('I\'m here to help! What would you like to know about your dashboard?', 'agent');
     }
-  }
-  )
+  }, [addMessage, chatState, handleDashboardModification, handleDesignDescription]);
 
   const downloadDashboard = useCallback(() => {
     if (chatState.generatedCode) {

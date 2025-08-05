@@ -1,4 +1,3 @@
-import React from 'react';
 import { Bot, BarChart3 } from 'lucide-react';
 import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';

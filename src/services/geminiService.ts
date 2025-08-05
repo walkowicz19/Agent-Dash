@@ -1,10 +1,10 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 import { DataAnalysis, UploadedFile } from '../types';
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
-  private reasoningModel: any;
-  private codingModel: any;
+  private reasoningModel: GenerativeModel;
+  private codingModel: GenerativeModel;
 
   constructor(apiKey: string = 'AIzaSyBRexGFUmrJwfSs5mMYE4k4QlSsriizfZ8') {
     this.genAI = new GoogleGenerativeAI(apiKey);
@@ -367,7 +367,7 @@ export class GeminiService {
 </html>`;
   }
 
-  private generateSampleTableRows(count: number, columns: string[]): string {
+  private generateSampleTableRows(count: number, _columns: string[]): string {
     const sampleData = [
       ['CUST-001', 'John Smith', 'TechCorp', 'USA', '2024-01-15'],
       ['CUST-002', 'Jane Doe', 'DataSys', 'Canada', '2024-01-20'],
