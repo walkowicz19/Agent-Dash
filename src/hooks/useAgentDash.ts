@@ -89,7 +89,7 @@ A full rebuild is required for the app to see the new API key. If you've checked
       setLoadingMessageId(null);
       setIsLoading(false);
     }
-  }, [loadingMessageIId, updateMessage]);
+  }, [loadingMessageId, updateMessage]);
 
   const handleFileUpload = useCallback(async (files: UploadedFile[]) => {
     setChatState(prev => ({ ...prev, uploadedFiles: files }));
