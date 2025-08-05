@@ -70,7 +70,7 @@ export class GeminiService {
     return JSON.parse(jsonString);
   }
 
-  async generateDashboard(analysis: DataAnalysis, useAllData: boolean, designDescription: string, data: any[]): Promise<string> {
+  async generateDashboard(analysis: DataAnalysis, useAllData: boolean, designDescription: string, data: any[]): Promise<{ title: string; description: string; html: string; }> {
     const fullDataString = JSON.stringify(data);
     const prompt = `
       You are an expert web developer. Create a complete, functional HTML dashboard.
@@ -127,17 +127,23 @@ export class GeminiService {
       </script>
 
       **Output Format (CRITICAL):**
-      - Your entire response must be ONLY a single valid JSON object.
-      - Do NOT include any markdown formatting (like \`\`\`json) or explanations.
-      - The JSON object must have this exact structure:
-      {
-        "title": "A creative and descriptive title for the dashboard",
-        "description": "A concise, one-line summary of the dashboard's purpose.",
-        "html": "The complete HTML code for the dashboard, starting with <!DOCTYPE html>."
-      }
+      - Your entire response must be ONLY the complete HTML code for the dashboard.
+      - Do NOT include any markdown formatting (like \`\`\`html) or explanations.
+      - Start the response with \`<!DOCTYPE html>\`.
+      - Inside the \`<head>\` section, include the title and description as meta tags with these exact names:
+        <meta name="agent-dash-title" content="A creative and descriptive title for the dashboard">
+        <meta name="agent-dash-description" content="A concise, one-line summary of the dashboard's purpose.">
     `;
     const result = await this.callWithRetry(() => this.codingModel.generateContent(prompt));
-    return this.extractJsonObject(result.response.text());
+    const html = result.response.text().replace(/```html/g, '').replace(/```/g, '').trim();
+
+    const titleMatch = html.match(/<meta\s+name="agent-dash-title"\s+content="([^"]*)"\s*\/?>/);
+    const descriptionMatch = html.match(/<meta\s+name="agent-dash-description"\s+content="([^"]*)"\s*\/?>/);
+
+    const title = titleMatch ? titleMatch[1] : 'Untitled Dashboard';
+    const description = descriptionMatch ? descriptionMatch[1] : 'No description provided.';
+
+    return { title, description, html };
   }
 
   async modifyDashboardElement(currentCode: string, element: SelectedElement, modificationRequest: string): Promise<string> {

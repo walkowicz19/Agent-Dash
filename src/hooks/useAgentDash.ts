@@ -89,7 +89,7 @@ A full rebuild is required for the app to see the new API key. If you've checked
       setLoadingMessageId(null);
       setIsLoading(false);
     }
-  }, [loadingMessageId, updateMessage]);
+  }, [loadingMessageIId, updateMessage]);
 
   const handleFileUpload = useCallback(async (files: UploadedFile[]) => {
     setChatState(prev => ({ ...prev, uploadedFiles: files }));
@@ -138,8 +138,7 @@ A full rebuild is required for the app to see the new API key. If you've checked
     try {
       if (!dataAnalysis) throw new Error('No data analysis available');
       const allData = chatState.uploadedFiles.flatMap(file => file.data || []);
-      const resultString = await geminiService.generateDashboard(dataAnalysis, chatState.selectedData === 'all', description, allData);
-      const { title, description: desc, html } = JSON.parse(resultString);
+      const { title, description: desc, html } = await geminiService.generateDashboard(dataAnalysis, chatState.selectedData === 'all', description, allData);
       setChatState(prev => ({ ...prev, generatedCode: html, dashboardTitle: title, dashboardDescription: desc, step: 'preview' }));
     } catch (error: any) {
       console.error(error);
