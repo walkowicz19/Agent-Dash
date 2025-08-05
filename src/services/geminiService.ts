@@ -7,7 +7,7 @@ export class GeminiService {
   private codingModel: GenerativeModel;
 
   constructor() {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const apiKey = import.meta.env.AIzaSyAh8nakhcMUrbW0uq95YHAyQ7unHh-Za7Q;
     if (!apiKey || !apiKey.startsWith('AIza')) {
       throw new Error('VITE_GEMINI_API_KEY is not defined or is invalid. Please check your .env file.');
     }
