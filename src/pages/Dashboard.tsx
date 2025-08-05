@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Bot, BarChart3, Home } from 'lucide-react';
+import { BarChart3, Home } from 'lucide-react';
 import { ChatMessage } from '../components/ChatMessage';
 import { ChatInput } from '../components/ChatInput';
 import { FileUpload } from '../components/FileUpload';
