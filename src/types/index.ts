@@ -1,6 +1,6 @@
 export interface Message {
   id: string;
-  type: 'user' | 'agent';
+  type: 'user' | 'agent' | 'success';
   content: string;
   timestamp: Date;
   isLoading?: boolean;

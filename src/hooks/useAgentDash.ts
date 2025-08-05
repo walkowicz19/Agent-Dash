@@ -31,9 +31,9 @@ Let's start by uploading your data files. What kind of dashboard are you looking
   const [dataAnalysis, setDataAnalysis] = useState<DataAnalysis | null>(null);
   const geminiService = new GeminiService('AIzaSyBRexGFUmrJwfSs5mMYE4k4QlSsriizfZ8');
 
-  const addMessage = useCallback((content: string, type: 'user' | 'agent', isLoading = false) => {
+  const addMessage = useCallback((content: string, type: Message['type'], isLoading = false) => {
     const newMessage: Message = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random()}`,
       type,
       content,
       timestamp: new Date(),
@@ -43,9 +43,9 @@ Let's start by uploading your data files. What kind of dashboard are you looking
     return newMessage.id;
   }, []);
 
-  const updateMessage = useCallback((id: string, content: string, isLoading = false) => {
+  const updateMessage = useCallback((id: string, props: Partial<Omit<Message, 'id'>>) => {
     setMessages(prev => prev.map(msg => 
-      msg.id === id ? { ...msg, content, isLoading } : msg
+      msg.id === id ? { ...msg, ...props, timestamp: new Date() } : msg
     ));
   }, []);
 
@@ -73,17 +73,23 @@ Let's start by uploading your data files. What kind of dashboard are you looking
         const analysis = await geminiService.analyzeData(files);
         setDataAnalysis(analysis);
         
-        updateMessage(loadingId, `Great! I've analyzed your ${files.length} file(s). Here's what I found:
+        updateMessage(loadingId, {
+          content: `Great! I've analyzed your ${files.length} file(s). Here's what I found:
 
 📊 **Data Summary**: ${analysis.summary}
 📈 **Key Insights**: 
 ${analysis.keyInsights.map(insight => `• ${insight}`).join('\n')}
 
-Now, would you like to use all your data or focus on the most important insights I've identified?`);
+Now, would you like to use all your data or focus on the most important insights I've identified?`,
+          isLoading: false,
+        });
 
         setChatState(prev => ({ ...prev, step: 'data-selection' }));
       } catch (error) {
-        updateMessage(loadingId, 'Sorry, I encountered an error analyzing your data. Please try uploading your files again.');
+        updateMessage(loadingId, {
+          content: 'Sorry, I encountered an error analyzing your data. Please try uploading your files again.',
+          isLoading: false,
+        });
       } finally {
         setIsLoading(false);
       }
@@ -133,14 +139,21 @@ For example: "Create a modern, professional dashboard with revenue charts, custo
 
       setChatState(prev => ({ ...prev, generatedCode, step: 'preview' }));
       
-      updateMessage(loadingId, `🎉 Your dashboard is ready! I've created a beautiful, interactive dashboard based on your requirements.
+      updateMessage(loadingId, {
+        content: `🎉 Your dashboard is ready! I've created a beautiful, interactive dashboard based on your requirements.
 
 **You can now click on any element in the preview to select it and ask me to make changes.**
 
-Feel free to download the files or ask me to make any adjustments!`);
+Feel free to download the files or ask me to make any adjustments!`,
+        isLoading: false,
+        type: 'success',
+      });
 
     } catch (error) {
-      updateMessage(loadingId, 'I encountered an error generating your dashboard. Please try describing your design requirements again.');
+      updateMessage(loadingId, {
+        content: 'I encountered an error generating your dashboard. Please try describing your design requirements again.',
+        isLoading: false,
+      });
       setChatState(prev => ({ ...prev, step: 'design' }));
     } finally {
       setIsLoading(false);
@@ -164,10 +177,17 @@ Feel free to download the files or ask me to make any adjustments!`);
 
       setChatState(prev => ({ ...prev, generatedCode: modifiedCode, selectedElement: null }));
       
-      updateMessage(loadingId, `✅ Element updated successfully! The changes for "${modificationRequest}" have been applied. You can select another element or ask for more general changes.`);
+      updateMessage(loadingId, {
+        content: `✅ Element updated successfully! The changes for "${modificationRequest}" have been applied. You can select another element or ask for more general changes.`,
+        isLoading: false,
+        type: 'success',
+      });
 
     } catch (error) {
-      updateMessage(loadingId, 'I encountered an error modifying the element. Please try describing your changes differently.');
+      updateMessage(loadingId, {
+        content: 'I encountered an error modifying the element. Please try describing your changes differently.',
+        isLoading: false,
+      });
       setChatState(prev => ({ ...prev, selectedElement: null }));
     } finally {
       setIsLoading(false);
@@ -199,10 +219,17 @@ Feel free to download the files or ask me to make any adjustments!`);
 
       setChatState(prev => ({ ...prev, generatedCode: modifiedCode }));
       
-      updateMessage(loadingId, `✅ Dashboard updated successfully! I've applied the requested changes. The updated dashboard is now visible in the preview panel.`);
+      updateMessage(loadingId, {
+        content: `✅ Dashboard updated successfully! I've applied the requested changes. The updated dashboard is now visible in the preview panel.`,
+        isLoading: false,
+        type: 'success',
+      });
 
     } catch (error) {
-      updateMessage(loadingId, 'I encountered an error modifying your dashboard. Please try describing your changes differently.');
+      updateMessage(loadingId, {
+        content: 'I encountered an error modifying your dashboard. Please try describing your changes differently.',
+        isLoading: false,
+      });
     } finally {
       setIsLoading(false);
     }
