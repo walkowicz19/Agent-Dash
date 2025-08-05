@@ -12,7 +12,7 @@ export class GeminiService {
       throw new Error('VITE_GEMINI_API_KEY is not defined or is invalid. Please check your .env file.');
     }
     this.genAI = new GoogleGenerativeAI(apiKey);
-    this.reasoningModel = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+    this.reasoningModel = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     this.codingModel = this.genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
   }
 
@@ -92,6 +92,31 @@ export class GeminiService {
       - Include interactive filters and a search bar.
       - Use a professional, clean design.
       - Include the element selection script provided below at the end of the <body>.
+
+      **Chart Generation Guide (CRITICAL):**
+      1.  **Access Data:** All your chart logic MUST use the \`data\` variable that is embedded in the script tag.
+      2.  **Process Data:** Before rendering a chart, process the raw \`data\` array using JavaScript (e.g., \`data.map(...)\`, \`data.reduce(...)\`) to aggregate and format it for ApexCharts.
+      3.  **Example Data Transformation:** To create a bar chart of customers per country, you would first process the data like this:
+          \`\`\`javascript
+          const countryCounts = data.reduce((acc, curr) => {
+            const country = curr.Country || 'Unknown';
+            acc[country] = (acc[country] || 0) + 1;
+            return acc;
+          }, {});
+          const chartCategories = Object.keys(countryCounts);
+          const chartSeriesData = Object.values(countryCounts);
+          \`\`\`
+      4.  **Configure Chart:** Use the processed data to build the ApexCharts options object.
+          \`\`\`javascript
+          const options = {
+            chart: { type: 'bar' },
+            series: [{ name: 'Customers', data: chartSeriesData }],
+            xaxis: { categories: chartCategories }
+          };
+          const chart = new ApexCharts(document.querySelector("#chart-element-id"), options);
+          chart.render();
+          \`\`\`
+      5.  **Create Multiple Charts:** Apply this pattern for every chart you generate. Analyze the user's request and the data to create several relevant and insightful charts.
 
       **Element Selection Script (MANDATORY):**
       <script id="agent-dash-selection-script">
