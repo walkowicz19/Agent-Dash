@@ -6,7 +6,7 @@ The creation of Agent Dash was a deliberate process, moving from a conceptual wo
 
 <img width="960" height="459" alt="Captura de Tela (46)" src="https://github.com/user-attachments/assets/98e26156-9dd6-4375-b5bf-626c3569ab31" />
 
-- Initial Concept (LangFlow Agent): As shown in the LangFlow screenshot, the project's foundation was an AI agent built in LangFlow. This visual workflow demonstrated the core logic of using AI to process data and generate an output. It was the crucial first step to prove the concept's viability.
+- Initial Concept (LangFlow Agent): As shown in the above screenshot, the project's foundation was an AI agent built in LangFlow. This visual workflow demonstrated the core logic of using AI to process data and generate an output. It was the crucial first step to prove the concept's viability.
 
 - Front-End Prototype (Bolt.new): To give the project a user-facing interface, a front-end prototype was developed using Bolt.new. This initial app provided the basic application structure, allowing for the "Welcome to Agent Dash" screen and navigation between different views.
 
