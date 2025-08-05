@@ -22,11 +22,13 @@ The creation of Agent Dash was a deliberate process, moving from a conceptual wo
 Our platform is built on a modern and powerful stack:
 
 - Initial Workflow (LangFlow): The conceptual foundation for the AI logic.
+
 - Front-End (Dyad): Powers the current, full-featured user interface and complex front-end logic.
+
 <img width="1920" height="1121" alt="Captura de Tela (48)" src="https://github.com/user-attachments/assets/5f72a3a5-889c-428d-99af-72ce618bcb3b" />
-- AI Engine (Gemini API): We leverage Google's Gemini API for the core AI functionality:
-- Reasoning Model (gemini-1.5-flash): This model interprets user requests and data, determining the best approach to structure and visualize the dashboard.
-- Coding Model (gemini-2.5-pro): This highly capable model generates the code needed to build the interactive dashboard based on the reasoning output.
+
+- AI Engine (Gemini API): We leverage Google's Gemini API for the core AI functionality: Reasoning Model (gemini-1.5-flash): This model interprets user requests and data, determining the best approach to structure and visualize the dashboard. Coding Model (gemini-2.5-pro): This highly capable model generates the code needed to build the interactive dashboard based on the reasoning output.
+
 - Data and Dashboard Storage (Supabase): All user data files and generated dashboards are securely stored in Supabase, providing a reliable and scalable database solution for persistence and management.
 
 # How It Works: A Simple 4-Step Process
