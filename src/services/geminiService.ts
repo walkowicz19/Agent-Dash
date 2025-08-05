@@ -105,58 +105,38 @@ export class GeminiService {
     designDescription: string
   ): Promise<string> {
     try {
-      // Create unique identifier for this dashboard
-      const dashboardId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-      
       const prompt = `
-        You are an expert web developer. Create a UNIQUE, complete, functional HTML dashboard with the following SPECIFIC requirements:
-        
-        UNIQUE DASHBOARD ID: ${dashboardId}
-        
-        SPECIFIC DATA ANALYSIS:
-        - Summary: ${analysis.summary}
-        - Columns: ${analysis.columns.join(', ')}
-        - Row Count: ${analysis.rowCount}
-        - Key Insights: ${analysis.keyInsights.join(' | ')}
-        
-        DATA SCOPE: ${useAllData ? 'Use ALL available data columns and create comprehensive visualizations' : 'Focus ONLY on key insights and create streamlined visualizations'}
-        
-        USER DESIGN REQUIREMENTS: "${designDescription}"
-        
-        MANDATORY REQUIREMENTS:
-        1. Create a UNIQUE dashboard that reflects the SPECIFIC data analysis above
-        2. Use the EXACT column names from the analysis: [${analysis.columns.join(', ')}]
-        3. Generate realistic sample data that matches the data structure
-        4. Create charts that make sense for THIS specific dataset
-        5. Include KPIs relevant to THIS data (not generic ones)
-        6. Use ApexCharts for all visualizations
-        7. Make it fully responsive and interactive
-        8. Include search and filter functionality
-        9. Use professional styling with clean layout
-        10. Add the dashboard ID "${dashboardId}" in the title
-        
-        SPECIFIC FEATURES TO INCLUDE:
-        - Header with title: "${designDescription || 'Custom Dashboard'} - ID: ${dashboardId}"
-        - ${useAllData ? '4-6 KPI cards based on ALL data columns' : '3-4 KPI cards based on key insights'}
-        - ${useAllData ? '3-4 different chart types' : '2-3 focused charts'} using ApexCharts
-        - Data table with the EXACT columns: [${analysis.columns.slice(0, 8).join(', ')}]
-        - Interactive filters and search
-        - Sample data that reflects the analysis summary: "${analysis.summary}"
-        
-        STYLING REQUIREMENTS:
-        - Color scheme: White background, black primary, gray secondary
-        - Modern, clean design
-        - Responsive grid layout
-        - Professional typography
-        - Smooth animations and hover effects
-        
-        IMPORTANT: 
-        - This must be a UNIQUE dashboard, not a template
-        - Generate realistic sample data that matches the column structure
-        - Charts should visualize data that makes sense for this specific dataset
-        - Include the dashboard ID in multiple places for uniqueness
-        
-        Return only the complete HTML code without any markdown formatting or explanations.
+        You are an expert web developer. Create a complete, functional, and unique HTML dashboard based on the following specific requirements.
+
+        **1. Data Context:**
+        - **Analysis Summary:** ${analysis.summary}
+        - **Columns:** ${analysis.columns.join(', ')}
+        - **Row Count:** ${analysis.rowCount}
+        - **Key Insights:** ${analysis.keyInsights.join(' | ')}
+        - **Data Scope:** ${useAllData ? 'Use ALL available data columns for comprehensive visualizations.' : 'Focus ONLY on key insights for streamlined visualizations.'}
+
+        **2. User Design Preferences:**
+        - **Style & Features:** "${designDescription}"
+
+        **3. Mandatory Requirements:**
+        - **Dashboard Title:** Generate a creative and descriptive title for the dashboard based on the data's content (e.g., "Global Sales Performance", "Customer Subscription Trends"). The title must NOT contain any session or dashboard IDs.
+        - **Content:** The dashboard must be unique and directly reflect the provided data analysis. Use the EXACT column names: [${analysis.columns.join(', ')}].
+        - **Data:** Generate realistic sample data that matches the column structure and analysis summary.
+        - **Visualizations:** Use ApexCharts for all charts. The charts must be relevant to THIS specific dataset.
+        - **KPIs:** Include KPIs that are relevant to THIS data, not generic ones.
+        - **Interactivity:** The dashboard must be fully responsive, with interactive filters and a search bar.
+        - **Styling:** Use a professional, clean design with a white background, black primary color, and gray secondary color. Implement a responsive grid layout and smooth hover effects.
+
+        **4. Specific Features to Include:**
+        - A header containing the AI-generated title.
+        - ${useAllData ? '4-6 KPI cards based on ALL data columns.' : '3-4 KPI cards based on key insights.'}
+        - ${useAllData ? '3-4 different chart types.' : '2-3 focused charts.'}
+        - A data table displaying the first 8 columns: [${analysis.columns.slice(0, 8).join(', ')}].
+
+        **5. Output Format:**
+        - Your entire response must be ONLY the complete HTML code.
+        - Start your response with \`<!DOCTYPE html>\` and end with \`</html>\`.
+        - DO NOT include any markdown formatting (like \`\`\`html), comments, or explanations outside of the HTML code itself.
       `;
 
       const result = await this.callWithRetry(() => this.codingModel.generateContent(prompt));
