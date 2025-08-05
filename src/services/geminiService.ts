@@ -12,7 +12,7 @@ export class GeminiService {
       throw new Error('VITE_GEMINI_API_KEY is not defined or is invalid. Please check your .env file.');
     }
     this.genAI = new GoogleGenerativeAI(apiKey);
-    this.reasoningModel = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    this.reasoningModel = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
     this.codingModel = this.genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
   }
 
